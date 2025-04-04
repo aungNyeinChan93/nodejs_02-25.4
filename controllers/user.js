@@ -1,8 +1,9 @@
 const { getConnection } = require("../utils/db");
 
+const db = getConnection();
+
 const all = (req, res) => {
   let users = [];
-  const db = getConnection();
   db.collection("users")
     .find()
     .forEach((user) => {
@@ -18,7 +19,6 @@ const all = (req, res) => {
 };
 
 const create = (req, res) => {
-  let db = getConnection();
   let user = req.body;
   db.collection("users")
     .insertOne(user)
@@ -32,7 +32,6 @@ const create = (req, res) => {
 };
 
 const show = (req, res) => {
-  let db = getConnection();
   let userName = req.params.name;
   db.collection("users")
     .findOne({ name: userName })
@@ -50,7 +49,6 @@ const show = (req, res) => {
 
 const modify = async (req, res) => {
   // Implement the modify function here
-  let db = getConnection();
   let userName = req.params.name;
   try {
     const result = await db
@@ -71,7 +69,6 @@ const modify = async (req, res) => {
 };
 
 const destroy = async (req, res) => {
-  let db = getConnection();
   let userName = req.params.name;
   try {
     const result = await db.collection("users").deleteOne({ name: userName });

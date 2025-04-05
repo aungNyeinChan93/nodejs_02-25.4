@@ -4,6 +4,7 @@ const app = express();
 app.use(express.json());
 
 const { connectDB } = require("./utils/db");
+const { connectDB: connectTestDB } = require("./utils/test");
 
 // db conection and initialization
 connectDB((err) => {
@@ -12,10 +13,24 @@ connectDB((err) => {
     return;
   } else {
     console.log("Database connected successfully");
+
+    // Initialize the server after successful connection
     init();
+
+    // Test database connection
+    connectTestDB(err => {
+      if (err) {
+        console.error("Failed to connect to the test database:", err);
+        return;
+      } else {
+        console.log("Test Database connected successfully");
+        test();
+      }
+    })
   }
 });
 
+// test_01 database connection
 const init = () => {
   app.listen(3000, () => {
     console.log("Server is running on port 3000");
@@ -46,4 +61,12 @@ const init = () => {
   //posts
   const postsRouter = require("./routes/posts");
   app.use("/api/posts", postsRouter);
+
 };
+
+
+// for testing purposes only =>test_o2 database connection
+const test = () => {
+  const testsRouter = require("./routes/tests");
+  app.use("/api/tests", testsRouter);
+}

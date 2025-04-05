@@ -21,6 +21,11 @@ const init = () => {
     console.log("Server is running on port 3000");
   });
 
+  // home
+  app.get("/", (req, res) => {
+    res.send("Welcome to the home page!");
+  });
+
   // test
   app.get("/test", (req, res) => {
     res.send("Hello World!");
@@ -33,4 +38,12 @@ const init = () => {
   // products
   const productsRouter = require("./routes/products");
   app.use("/api/products", productsRouter);
+
+  // categories
+  const categoriresRouter = require("./routes/categories");
+  app.use("/api/categories", categoriresRouter);
+
+  //posts
+  const postsRouter = require("./routes/posts");
+  app.use("/api/posts", postsRouter);
 };

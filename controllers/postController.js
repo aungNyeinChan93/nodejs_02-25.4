@@ -1,3 +1,5 @@
+const { ObjectId } = require("mongodb");
+
 const db = require("../utils/db").getConnection();
 
 const create = async (req, res) => {
@@ -45,6 +47,17 @@ const destroy = async (req, res) => {
         : res.status(404).json({ message: "Post not found" });
 }
 
+const modify = async (req, res) => {
+    const id = ObjectId.createFromHexString(req.params.id);
+    const post = await db.collection("posts").updateOne(
+        { _id: id },
+        { $set: { title: req.params.title } }
+    );
+    post.modifiedCount > 0
+        ? res.status(200).json({ message: 'Post modified successfully!' })
+        : res.status(404).json({ message: "Post not found" });
+}
+
 module.exports = {
-    create, all, getByUserId, destroy
+    create, all, getByUserId, destroy, modify
 };

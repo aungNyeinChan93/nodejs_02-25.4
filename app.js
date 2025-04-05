@@ -65,7 +65,7 @@ const init = () => {
 };
 
 
-// for testing purposes only =>test_o2 database connection
+// for testing purposes only =>test_02 database connection
 const test = () => {
   const testsRouter = require("./routes/tests");
   app.use("/api/tests", testsRouter);

@@ -11,6 +11,7 @@ router.use('/', (req, res, next) => {
 router.get('/', PostController.all)
 router.post('/', PostController.create)
 router.get('/:userId', PostController.getByUserId)
+router.patch('/:id/:title', PostController.modify)
 router.delete('/:title', PostController.destroy)
 
 module.exports = router;

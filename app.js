@@ -1,10 +1,15 @@
 const express = require("express");
 
+// backup
+const backupApp = require('./backup/backup');
+
 const app = express();
 app.use(express.json());
 
 const { connectDB } = require("./utils/db");
 const { connectDB: connectTestDB } = require("./utils/test");
+const { connectDB: backupDB } = require('./utils/backup');
+
 
 // db conection and initialization
 connectDB((err) => {
@@ -25,6 +30,13 @@ connectDB((err) => {
       } else {
         console.log("Test Database connected successfully");
         test();
+        backupDB((err) => {
+          if (!err) {
+            console.log("Backup Database connected successfully");
+            backupApp.call();
+          }
+          else console.error("Failed to connect to the backup database:", err);
+        })
       }
     })
   }

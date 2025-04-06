@@ -155,6 +155,28 @@ const filter = async (req, res) => {
     }
 }
 
+//push ->add, pull->remove , pop->1=last,-1=first,addToSet, set,unset
+const addColor = async (req, res) => {
+    try {
+        const id = ObjectId.createFromHexString(req.params.id);
+        // const result = await db.collection('products').updateOne({ _id: id }, { $set: { test: req.body.color } });
+        // const result = await db.collection('products').updateOne({ _id: id }, { $unset: { test: req.body } });
+        // const result = await db.collection('products').updateOne({ _id: id }, { $pop: { color: 1 } });
+        // const result = await db.collection('products').updateOne({ _id: id }, { $push: { color: req.body.color } });  
+        // const result = await db.collection('products').updateOne({ _id: id }, { $pull: { color: req.body.color } });
+        const result = await db.collection('products').updateOne({ _id: id }, { $addToSet: { color: req.body.color } });
+        result.modifiedCount > 0
+            ? res.status(200).json({
+                message: 'color added success',
+                result: result
+            })
+            : res.status(404).json({ message: "not Found!" })
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 
 module.exports = {
     all,
@@ -166,5 +188,6 @@ module.exports = {
     createMany,
     updatePrice,
     destroyMany,
-    filter
+    filter,
+    addColor
 };

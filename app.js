@@ -84,5 +84,8 @@ const init = () => {
   const postsRouter = require("./routes/posts");
   app.use("/api/posts", postsRouter);
 
+  // DC-superHeros
+  const superHerosRouter = require('./routes/superHeros')
+  app.use('/api/superHeros', superHerosRouter)
 };
 

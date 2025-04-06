@@ -1,7 +1,8 @@
 const express = require("express");
 
 // backup
-const backupApp = require('./backup/backup');
+const { backup, callTest } = require('./backup/backup');
+const calling = require('./backup/backup').backup().test;
 
 const app = express();
 app.use(express.json());
@@ -33,7 +34,10 @@ connectDB((err) => {
         backupDB((err) => {
           if (!err) {
             console.log("Backup Database connected successfully");
-            backupApp.call();
+            backup();
+            backup().test();
+            callTest();
+            calling();
           }
           else console.error("Failed to connect to the backup database:", err);
         })
@@ -41,6 +45,12 @@ connectDB((err) => {
     })
   }
 });
+
+// for testing purposes only =>test_02 database connection
+const test = () => {
+  const testsRouter = require("./routes/tests");
+  app.use("/api/tests", testsRouter);
+}
 
 // test_01 database connection
 const init = () => {
@@ -76,9 +86,3 @@ const init = () => {
 
 };
 
-
-// for testing purposes only =>test_02 database connection
-const test = () => {
-  const testsRouter = require("./routes/tests");
-  app.use("/api/tests", testsRouter);
-}

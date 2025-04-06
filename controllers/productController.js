@@ -1,3 +1,5 @@
+const { ObjectId } = require("mongodb");
+
 const db = require("../utils/db").getConnection();
 
 const all = async (req, res) => {
@@ -13,7 +15,8 @@ const all = async (req, res) => {
 const show = async (req, res) => {
     const product = await db
         .collection("products")
-        .findOne({ name: req.params.name });
+        .findOne({ name: { $regex: new RegExp(`^${req.params.name}`) } });
+    // .findOne({ $where: `this.name = ${req.params.name}` });
     product
         ? res.status(200).json({
             message: "Product retrieved successfully",
@@ -56,7 +59,8 @@ const modify = async (req, res) => {
 
 const destroy = async (req, res) => {
     try {
-        const result = await db.collection('products').deleteOne({ name: req.params.name })
+        const id = ObjectId.createFromHexString(req.params.id);
+        const result = await db.collection('products').deleteOne({ _id: id })
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: "Product not found" });
         }
@@ -69,10 +73,98 @@ const destroy = async (req, res) => {
     }
 }
 
+const onlyName = async (req, res) => {
+    const productNames = await db.collection('products').find().project({ name: 1, _id: 0 }).toArray();
+    productNames.length > 0
+        ? res.status(200).json({
+            message: "Product names retrieved successfully",
+            result: productNames,
+        })
+        : res.status(404).json({ message: "No products" });
+}
+
+const createMany = async (req, res) => {
+    const newProducts = req.body.products;
+    try {
+        const result = await db.collection('products').insertMany(newProducts);
+        result.acknowledged
+            ? res.status(201).json({
+                message: 'Products created successfully',
+                result: newProducts
+            })
+            : res.status(404).json({ message: "No products" });
+    } catch (error) {
+        res.status(404).json({ message: error });
+    }
+}
+
+const updatePrice = async (req, res) => {
+    const oldPrice = Number(req.params.price);  // This should be the old price you want to update
+    try {
+        const result = await db.collection('products').updateMany({ price: oldPrice }, { $set: req.body })
+        if (result.matchedCount === 0) {
+            return res.status(404).json({
+                error: 'Products is not found!'
+            })
+        }
+        res.status(201).json({
+            message: "Product prices modify is successfully",
+            result: result.acknowledged
+        })
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+const destroyMany = async (req, res) => {
+    try {
+        const result = await db.collection('products').deleteMany({ price: Number(req.params.price) })
+        if (result.deletedCount == 0) {
+            return res.status(404).json({
+                message: 'not found!'
+            })
+        }
+        res.status(200).json({
+            message: 'Delete success '
+        })
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+
+const filter = async (req, res) => {
+    try {
+        const filterPrice = Number(req.params.price);
+        const filterName = req.params.name
+        // const result = await db.collection('products').find({ price: { $in: [filterPrice, 1000, 2000, 3000] } }).toArray(); //eq,ne,in,nin,gt,lt,gte,lte
+
+        const result = await db.collection('products')
+            // .find({ $where: `this.price == ${filterName} && this.name == ${filterName}` })
+            .find({ $and: [{ price: { $eq: filterPrice } }, { name: filterName }] }) //$and ,$or ,$nor == nin ,$not === !
+            .toArray();
+
+        result
+            ? res.status(200).json({ message: " success", result: result })
+            : res.status(404).json({ message: "fail" })
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+
 module.exports = {
     all,
     show,
     create,
     modify,
-    destroy
+    destroy,
+    onlyName,
+    createMany,
+    updatePrice,
+    destroyMany,
+    filter
 };
